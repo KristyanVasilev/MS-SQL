@@ -14,7 +14,7 @@ CREATE PROC usp_GetEmployeesSalaryAboveNumber(@inputSalary DECIMAL(18,4))
 AS
 SELECT FirstName, LastName 
   FROM Employees
- WHERE Salary > @inputSalary
+ WHERE Salary >= @inputSalary
 
 EXEC usp_GetEmployeesSalaryAboveNumber 48100
 
@@ -93,3 +93,36 @@ DECLARE @setOfLetters VARCHAR(MAX) = 'osifa'
    FROM Towns
 
 --08. Delete Employees and Departments
+USE SoftUni
+GO
+
+CREATE PROC usp_DeleteEmployeesFromDepartment(@departmentId INT)  
+AS
+ALTER TABLE Departments
+ALTER COLUMN ManagerID INT NULL
+
+DELETE FROM EmployeesProjects
+ WHERE EmployeeID IN (SELECT EmployeeID FROM Employees WHERE DepartmentID = @departmentId)
+
+UPDATE Employees
+   SET ManagerID = NULL
+ WHERE EmployeeID IN (SELECT EmployeeID FROM Employees WHERE DepartmentID = @departmentId)
+
+UPDATE Employees
+   SET ManagerID = NULL
+ WHERE ManagerID IN (SELECT EmployeeID FROM Employees WHERE DepartmentID = @departmentId)
+
+UPDATE Departments
+   SET ManagerID = NULL
+ WHERE ManagerID IN (SELECT EmployeeID FROM Employees WHERE DepartmentID = @departmentId)
+
+DELETE FROM Employees
+ WHERE DepartmentID = @departmentId
+
+DELETE FROM Departments
+ WHERE DepartmentID = @departmentId
+
+SELECT COUNT(*) 
+  FROM Employees
+ WHERE DepartmentID = @departmentId
+
